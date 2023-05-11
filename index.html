@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Контролно 4</title>
+
+   <script src="three.min.js"></script>
+   <script src="vax.js"></script>
+</head>
+<body>
+   <script>
+      vaxInit();
+
+      camera = new THREE.PerspectiveCamera( 27, window.innerWidth/window.innerHeight, 400, 3000 );
+		camera.position.set( 0, 0, 0 );
+		camera.lookAt( new THREE.Vector3( 0, 0, -1 ) );
+      camera.fov = 50;
+
+
+      onWindowResize();
+
+      var texture = new THREE.CubeTextureLoader().load( [
+				'posx.jpg', 'negx.jpg',
+				'posy.jpg', 'negy.jpg',
+				'posz.jpg', 'negz.jpg' ] );
+
+      scene.background = texture.clone();
+
+      var crystals = [];
+      for( var i=0; i<300; i++)
+      {
+
+         var crystal = new THREE.Mesh(
+            new THREE.OctahedronGeometry(1),
+            new THREE.MeshLambertMaterial({
+               envMap: texture,
+               refractionRation: 0.99,
+               // transparent: true,
+               opacity: 0.3,
+            })
+         );
+
+         crystal.scale.set( 20, 40, 20 );
+
+         var r = THREE.MathUtils.randFloat(1000,3000),
+            a = THREE.MathUtils.randFloat(0,2*Math.PI),
+            b = THREE.MathUtils.randFloat(Math.PI/4,Math.PI/1.8);
+         crystal.position.setFromSphericalCoords( r, b, a );
+
+         crystals.push(crystal);
+         scene.add(crystal);
+      }
+
+      texture.mapping = THREE.CubeRefractionMapping;
+
+      window.addEventListener("deviceorientation", (event) => {
+         if( event.alpha === null ) return;
+
+         var rotationX = event.gamma;
+         var rotationY = event.alpha;
+
+         if( event.gamma >= 0 )
+         {
+            rotationX = 90 - rotationX;
+         }
+         else
+         {
+            rotationY = rotationY + 180;
+            rotationX = -90 - rotationX;
+         }
+
+         camera.rotation.set( THREE.MathUtils.degToRad(rotationX),
+                              THREE.MathUtils.degToRad(rotationY),
+                              0,
+                              'YXZ');
+      }, true);
+
+      function animate(t) {
+         for( var i=0; i<300; i++ )
+					crystals[i].rotation.y = t+i;
+
+      }
+
+   </script>
+
+</body>
+</html>

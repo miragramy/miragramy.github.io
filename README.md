@@ -1,1 +1,0 @@
-# miragramy.github.io
